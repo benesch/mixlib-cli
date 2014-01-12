@@ -556,6 +556,28 @@ describe Mixlib::Config do
     end
   end
 
+  describe "When a configurable exists with writer" do
+    before :each do
+      @klass = Class.new
+      @klass.extend(::Mixlib::Config)
+      @klass.class_eval do
+        configurable(:attr) do |c|
+          c.writes_value { |value| value * 2 }
+        end
+      end
+    end
+
+    it("the writer should not be called when merge! is called with process = false") do
+      @klass.merge!({ :attr => 2 })
+      @klass.attr.should == 2
+    end
+
+    it("the writer should be called when merge! is called with process = true") do
+      @klass.merge!({ :attr => 2 }, true)
+      @klass.attr.should == 4
+    end
+  end
+
   describe "When a configurable exists with writer and default value" do
     before :each do
       @klass = Class.new

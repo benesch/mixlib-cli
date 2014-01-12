@@ -188,16 +188,24 @@ module Mixlib
     #
     # === Parameters
     # hash<Hash>: a hash in the same format as output by save.
+    # process<Boolean>: If true, treats hash as unprocessed user input and runs
+    #   any configurable's setters as if you'd called `[]=` on every key in the
+    #   hash. If false, treats hash as the output of a +save+ call and performs
+    #   no such validation.
     #
     # === Returns
     # self
-    def merge!(hash)
-      hash.each do |key, value|
-        if self.config_contexts.has_key?(key)
-          # Grab the config context and let internal_get cache it if so desired
-          self.config_contexts[key].restore(value)
-        else
-          self.configuration[key] = value
+    def merge!(hash, process = false)
+      if process
+        hash.each { |key, value| self[key] = value }
+      else
+        hash.each do |key, value|
+          if self.config_contexts.has_key?(key)
+            # Grab the config context and let internal_get cache it if so desired
+            self.config_contexts[key].restore(value)
+          else
+            self.configuration[key] = value
+          end
         end
       end
       self
